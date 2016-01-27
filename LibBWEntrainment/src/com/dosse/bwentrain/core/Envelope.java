@@ -21,6 +21,8 @@ package com.dosse.bwentrain.core;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -290,7 +292,7 @@ public class Envelope implements Serializable {
     }
 
     /**
-     * outputs the Envelope as an XML String<br>
+     * outputs the Envelope as an XML element<br>
      * Example:<br>
      * &lt;Envelope name='test' length='60.0'&gt;<br>
      * ... LIST OF POINTS, SEE CLASS POINT FOR EXAMPLE ...<br>
@@ -298,14 +300,20 @@ public class Envelope implements Serializable {
      *
      * @return xml
      */
-    @Override
-    public String toString() {
-        String xml = "<Envelope name='" + name + "' length='" + length + "'>";
-        for (Point x : p) {
-            xml += x.toString();
+    public Element toXML() {
+        try {
+            Document d = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            Element env = d.createElement("Envelope");
+            d.appendChild(env);
+            env.setAttribute("name", name);
+            env.setAttribute("length", "" + length);
+            for (Point x : p) {
+                env.appendChild(d.adoptNode(x.toXML()));
+            }
+            return env;
+        } catch (Throwable t) {
+            return null;
         }
-        xml += "</Envelope>";
-        return xml;
     }
 
     @Override
@@ -339,7 +347,8 @@ public class Envelope implements Serializable {
      * has the same value as the point before and the point after it. values are
      * considered identical if their difference is &lt;tolerance
      *
-     * @param tolerance 2 points are considered identical if their difference is &lt;tolerance
+     * @param tolerance 2 points are considered identical if their difference is
+     * &lt;tolerance
      * @return number of points removed
      */
     public int optimize(float tolerance) {
@@ -359,12 +368,14 @@ public class Envelope implements Serializable {
         }
         return removedPoints;
     }
-    
+
     @Override
-    public Envelope clone(){
-        Envelope e=new Envelope(name, length);
-        e.p=new Point[0];
-        for(Point x:p) e.addPoint(x.t, x.val);
+    public Envelope clone() {
+        Envelope e = new Envelope(name, length);
+        e.p = new Point[0];
+        for (Point x : p) {
+            e.addPoint(x.t, x.val);
+        }
         return e;
     }
 

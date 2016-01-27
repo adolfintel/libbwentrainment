@@ -18,9 +18,17 @@
  */
 package com.dosse.bwentrain.core;
 
-import com.dosse.bwentrain.utils.XMLUtils;
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -252,7 +260,7 @@ public class Preset implements Serializable {
             return;
         }
         try {
-            EntrainmentTrack e = new EntrainmentTrack(XMLUtils.getXMLDocumentFromString(ent[i].toString()));
+            EntrainmentTrack e = new EntrainmentTrack(ent[i].toXML());
             EntrainmentTrack[] newEnt = new EntrainmentTrack[ent.length + 1];
             System.arraycopy(ent, 0, newEnt, 0, ent.length);
             newEnt[newEnt.length - 1] = e;
@@ -394,7 +402,7 @@ public class Preset implements Serializable {
     }
 
     /**
-     * ouptuts the Preset as XML. Example output:<br>
+     * ouptuts the Preset as an XML element. Example output:<br>
      * &lt;Preset length='60.0' loop='40.0'&gt;<br>
      * &lt;PresetInfos&gt;<br>
      * &lt;Title&gt;Title, escaped&lt;/Title&gt;<br>
@@ -408,20 +416,52 @@ public class Preset implements Serializable {
      *
      * @return xml
      */
+    public Element toXML() {
+        try {
+            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            Element root = doc.createElement("Preset");
+            doc.appendChild(root);
+            root.setAttribute("length", "" + length);
+            if (loop != -1) {
+                root.setAttribute("loop", "" + loop);
+            }
+            Element pInfos = doc.createElement("PresetInfos");
+            root.appendChild(pInfos);
+            Element pTitle = doc.createElement("Title");
+            pInfos.appendChild(pTitle);
+            pTitle.appendChild(doc.createTextNode(title));
+            Element pAuthor = doc.createElement("Author");
+            pInfos.appendChild(pAuthor);
+            pAuthor.appendChild(doc.createTextNode(author));
+            Element pDesc = doc.createElement("Description");
+            pInfos.appendChild(pDesc);
+            pDesc.appendChild(doc.createTextNode(description));
+            root.appendChild(doc.adoptNode(noise.toXML()));
+            for (EntrainmentTrack e : ent) {
+                root.appendChild(doc.adoptNode(e.toXML()));
+            }
+            return root;
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * returns the preset as an XML string
+     *
+     * @return xml
+     */
     @Override
     public String toString() {
-        String xml = "<Preset length='" + length + "'" + (loop != -1 ? (" loop='" + loop + "'") : "") + ">";
-        xml += "<PresetInfos>";
-        xml += "<Title>" + XMLUtils.escape(title) + "</Title>";
-        xml += "<Author>" + XMLUtils.escape(author) + "</Author>";
-        xml += "<Description>" + XMLUtils.escape(description) + "</Description>";
-        xml += "</PresetInfos>";
-        xml += noise.toString();
-        for (EntrainmentTrack e : ent) {
-            xml += e.toString();
+        try {
+            Transformer t = TransformerFactory.newInstance().newTransformer();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            t.transform(new DOMSource(toXML()), new StreamResult(baos));
+            return new String(baos.toByteArray());
+        } catch (Throwable t) {
+            return null;
         }
-        xml += "</Preset>";
-        return xml;
     }
 
     @Override

@@ -19,6 +19,11 @@
 package com.dosse.bwentrain.core;
 
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
@@ -82,14 +87,22 @@ public class Point implements Serializable, Comparable {
     }
 
     /**
-     * outputs the Point as an XML string<br>
+     * outputs the Point as an XML element<br>
      * Example output: &lt;Point time=&lt;10.0&lt; value=&lt;1.0&lt; /&gt;
      *
      * @return xml
      */
-    @Override
-    public String toString() {
-        return "<Point time='" + t + "' value='" + val + "'/>";
+    public Element toXML(){
+        try {
+            Document d=DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            Element p=d.createElement("Point");
+            d.appendChild(p);
+            p.setAttribute("time", ""+t);
+            p.setAttribute("value", ""+val);
+            return p;
+        } catch (Throwable ex) {
+            return null;
+        }
     }
 
     /**

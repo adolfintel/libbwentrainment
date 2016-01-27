@@ -19,6 +19,8 @@
 package com.dosse.bwentrain.core;
 
 import java.io.Serializable;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -210,21 +212,27 @@ public class EntrainmentTrack implements Serializable {
     }
 
     /**
-     * outputs the entire Track as an XML String Example: &lt;EntrainmentTrack
-     * length='60.0' trackVolume='0.8'&gt;<br>
+     * outputs the entire Track as an XML element<br>
+     * Example: &lt;EntrainmentTrack length='60.0' trackVolume='0.8'&gt;<br>
      * ... 3 ENVELOPES, SEE CLASS ENVELOPE FOR EXAMPLE ...<br>
      * &lt;/EntrainmentTrack&gt;
      *
      * @return xml
      */
-    @Override
-    public String toString() {
-        String xml = "<EntrainmentTrack length='" + length + "' trackVolume='" + trackVolume + "'>";
-        xml += ent.toString();
-        xml += vol.toString();
-        xml += baseFreq.toString();
-        xml += "</EntrainmentTrack>";
-        return xml;
+    public Element toXML() {
+        try {
+            Document d = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            Element t = d.createElement("EntrainmentTrack");
+            d.appendChild(t);
+            t.setAttribute("length", "" + length);
+            t.setAttribute("trackVolume", "" + trackVolume);
+            t.appendChild(d.adoptNode(ent.toXML()));
+            t.appendChild(d.adoptNode(vol.toXML()));
+            t.appendChild(d.adoptNode(baseFreq.toXML()));
+            return t;
+        } catch (Throwable t) {
+            return null;
+        }
     }
 
     @Override
@@ -252,7 +260,8 @@ public class EntrainmentTrack implements Serializable {
      * useless if it has the same value as the point before and the point after
      * it. values are considered identical if their difference is &lt;tolerance
      *
-     * @param tolerance 2 points are considered identical if their difference is &lt;tolerance
+     * @param tolerance 2 points are considered identical if their difference is
+     * &lt;tolerance
      * @return number of points removed
      */
     public int optimize(float tolerance) {
@@ -268,14 +277,14 @@ public class EntrainmentTrack implements Serializable {
     public boolean isUseless() {
         return trackVolume == 0 || (vol.getPointCount() == 1 && vol.getVal(0) == 0) || (baseFreq.getPointCount() == 1 && baseFreq.getVal(0) == 0) || (ent.getPointCount() == 1 && ent.getVal(0) == 0);
     }
-    
+
     @Override
-    public EntrainmentTrack clone(){
-        EntrainmentTrack e=new EntrainmentTrack(length);
-        e.baseFreq=baseFreq.clone();
-        e.ent=ent.clone();
-        e.vol=vol.clone();
-        e.trackVolume=trackVolume;
+    public EntrainmentTrack clone() {
+        EntrainmentTrack e = new EntrainmentTrack(length);
+        e.baseFreq = baseFreq.clone();
+        e.ent = ent.clone();
+        e.vol = vol.clone();
+        e.trackVolume = trackVolume;
         return e;
     }
 }
