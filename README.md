@@ -3,7 +3,7 @@
 LibBWEntrainment is a Free and Open Source Brainwave Entrainment Library for Java.
 The library is very flexible, allowing different types of renderers as well as multiple output devices (speakers, file, socket, ...), and it can easily be ported to other languages because it doesn't use any proprietary Java feature.
 
-[SINE Isochronic Entrainer](http://isochronic.io) is based on this library.
+[SINE Isochronic Entrainer](https://sine.fdossena.com) is based on this library.
 
 ## Components
 * __Core library__: LibBWEntrainment. This is always required
@@ -20,7 +20,7 @@ The library is very flexible, allowing different types of renderers as well as m
 
 ## Usage
 To compile the projects, import them in Netbeans.
-Alternatively, you can get precompiled binaries from [my site](http://downloads.fdossena.com/geth.php?r=libbwentrainment-bin)
+Alternatively, you can get precompiled binaries from [my site](https://downloads.fdossena.com/geth.php?r=libbwentrainment-bin)
 
 ## Compatibility
 __PC__: Multiplatform, Java SE 6 or newer (MP3 support requires Java SE 7).
@@ -30,7 +30,7 @@ __Android__: Android 2.3 (SDK 9) or newer. All architectures are supported.
 A partial Javascript port with playback capabilities only is available as part of the [SINE HTML5 port](https://github.com/adolfintel/sine-html5)
 
 ## License
-Copyright (C) 2015 Federico Dossena
+Copyright (C) 2014-2020 Federico Dossena
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
